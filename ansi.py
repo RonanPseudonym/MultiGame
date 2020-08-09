@@ -1,0 +1,5 @@
+color = "\u001b[38;5;"
+bg = "\u001b[48;5;"
+bold = "\u001b[1m"
+esc = "\u001b[0m"
+hidecursor = "\x1b[?25l"
