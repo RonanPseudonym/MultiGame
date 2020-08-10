@@ -3,8 +3,8 @@ import socketio, pyno, ansi, time, os
 socket = socketio.Client()
 messages = []
 
-global typing
-typing = []
+global typing, grid
+typing, grid = [], []
 
 global inp, name, color
 inp = ""
@@ -13,13 +13,22 @@ color = ""
 
 width, height = 40, 20
 
-grid = []
+substitutions = {
+    "2": ansi.bg+"240m "+ansi.esc,
+    "1": ansi.bg+"244m "+ansi.esc,
+    "0": ansi.bg+"250m "+ansi.esc,
+    "w": ansi.bg+"27m"+ansi.color+"69m "+ansi.esc
+}
 
-for i in range(height):
-    row = []
-    for j in range(width):
-        row.append("░")
-    grid.append(list(row))
+def formatGrid(grid):
+    viewGrid = []
+    for i in range(0, len(grid)):
+        row = []
+        for j in range(0, len(grid[i])): 
+            if grid[i][j] in substitutions: row.append(substitutions.get(grid[i][j]))
+            else: row.append(grid[i][j])
+        viewGrid.append(list(row))
+    return(viewGrid)
 
 def push(message): socket.emit("push", message)
 
@@ -39,9 +48,10 @@ def drawScreen(typing, inp):
     messages.append(formatTyping(typing))
     messages.append("")
     messages.append(inp)
+    viewGrid = formatGrid(grid)
     for i in range(len(grid)): 
-        try: print("".join(grid[i])+" "+messages[i])
-        except: print("".join(grid[i]))
+        try: print("".join(viewGrid[i])+" "+messages[i])
+        except: print("".join(viewGrid[i]))
     del messages[-1]
     del messages[-1]
     del messages[-1]
@@ -63,7 +73,7 @@ def recvMessage(message, sid):
         messages.append(message[1])
         pyno.notify(message[1],message[1],"default")
     elif message[0] == "location": grid[message[1][0][1]][message[1][0][0]] = ansi.bg+message[1][1][1]+" "+ansi.esc
-    elif message[0] == "not location": grid[message[1][1]][message[1][0]] = "░"
+    elif message[0] == "not location": grid[message[1][1]][message[1][0]] = "0"
     drawScreen(typing, inp)
 
 def passTypers():
@@ -82,3 +92,7 @@ def passName(var):
 def passColor(var):
     global color
     color = var
+
+def passGrid(var):
+    global grid
+    grid = var
