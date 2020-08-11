@@ -20,33 +20,35 @@ print("Connecting...")
 while True:
     try: 
         wsm.connect("ws://Black-Sun.ronanpseudonym.repl.co", hostname)
+        print("Connected")
         break
     except:
-        print("Waking server...")
-        time.sleep(10)
+        print("Waking server... (please wait about thirty seconds) ")
+        time.sleep(30)
 
 typing = False
 
-x, y = 20, 0
+x, y, gridx, gridy = 20, 0, 0, 0
 
 grid = []
 
-f = open(os.path.dirname(os.path.realpath(__file__))+"/home.txt")
-for line in f:
-    row = []
-    line = line.replace("\n","")
-    for i in range(len(line)):
-        row.append(line[i])
-    grid.append(list(line))
+directory = os.path.dirname(os.path.realpath(__file__))
 
-for i in range(len(grid)):
-    for j in range(len(grid[i])):
-        grid[i][j] = str(grid[i][j])
+def tile(x, y):
+    grid = []
 
-wsm.passGrid(grid)
+    f = open(directory+"/"+str(gridx)+"_"+str(gridy)+".txt")
+
+    for line in f: 
+        grid.append(list(line.replace("\n","")))
+
+    wsm.passGrid(grid, x, y)
+
+    return grid
 
 try: 
-    wsm.push(["location",[[x,y],[hostname, color]]])
+    grid = tile(gridx, gridy)
+    wsm.push(["location",[[[x,y],[gridx,gridy]],[hostname, color]]])
     while True:
         inp = ["> "]
         while True: 
@@ -62,25 +64,51 @@ try:
                     typing = False
                     if len(inp) == 2: del inp[-1]
             elif key == "up":
-                if not y - 1 == -1 and grid[y-1][x] == "0":
-                    wsm.push(["not location",[x,y]])
+                if y <= 0: 
+                    wsm.push(["not location",[[x,y],[gridx,gridy]]])
+                    gridy += 1
+                    y = height-1
+                    grid = tile(gridx, gridy)
+                    wsm.push(["location",[[[x,y],[gridx,gridy]],[hostname, color]]])
+                    break
+                elif grid[y-1][x] == "0":
+                    wsm.push(["not location",[[x,y],[gridx,gridy]]])
                     y -= 1
-                    wsm.push(["location",[[x,y],[hostname, color]]])
-            elif key == "down": 
-                if not y + 1 == height and grid[y+1][x] == "0":
-                    wsm.push(["not location",[x,y]])
+                    wsm.push(["location",[[[x,y],[gridx,gridy]],[hostname, color]]])
+            elif key == "down":
+                if y >= height-1: 
+                    wsm.push(["not location",[[x,y],[gridx,gridy]]])
+                    gridy -= 1
+                    y = 0
+                    grid = tile(gridx, gridy)
+                    wsm.push(["location",[[[x,y],[gridx,gridy]],[hostname, color]]])
+                    break 
+                elif grid[y+1][x] == "0":
+                    wsm.push(["not location",[[x,y],[gridx,gridy]]])
                     y += 1
-                    wsm.push(["location",[[x,y],[hostname, color]]])
-            elif key == "left": 
-                if not x - 1 == -1 and grid[y][x-1] == "0":
-                    wsm.push(["not location",[x,y]])
+                    wsm.push(["location",[[[x,y],[gridx,gridy]],[hostname, color]]])
+            elif key == "left":
+                if x >= width-2: 
+                    wsm.push(["not location",[[x,y],[gridx,gridy]]])
+                    gridx += 1
+                    x = 0
+                    grid = tile(gridx, gridy)
+                    wsm.push(["location",[[[x,y],[gridx,gridy]],[hostname, color]]])
+                    break
+                elif grid[y][x-1] == "0":
+                    wsm.push(["not location",[[x,y],[gridx,gridy]]])
                     x -= 1
-                    wsm.push(["location",[[x,y],[hostname, color]]])
+                    wsm.push(["location",[[[x,y],[gridx,gridy]],[hostname, color]]])
             elif key == "right": 
-                if not x + 1 == width and grid[y][x+1] == "0":
-                    wsm.push(["not location",[x,y]])
+                if x <= 1: 
+                    gridx -= 1
+                    x = width-1
+                    grid = tile(gridx, gridy)
+                    break
+                elif grid[y][x+1] == "0":
+                    wsm.push(["not location",[[x,y],[gridx,gridy]]])
                     x += 1
-                    wsm.push(["location",[[x,y],[hostname, color]]])
+                    wsm.push(["location",[[[x,y],[gridx,gridy]],[hostname, color]]])
             else: 
                 inp.append(key)
                 typing = True
@@ -88,7 +116,6 @@ try:
                 oldTyping = typing
                 wsm.push(["typing status",[hostname,typing]])
             wsm.passInp("".join(inp)+"▉")
-            os.system("clear")
             wsm.drawScreen(wsm.passTypers(), "".join(inp)+"▉")
         typing = False
         wsm.push(["typing status",[hostname,typing]])

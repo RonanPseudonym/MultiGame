@@ -11,6 +11,8 @@ inp = ""
 name = ""
 color = ""
 
+global gridx, gridy
+
 width, height = 40, 20
 
 substitutions = {
@@ -44,17 +46,19 @@ def formatTyping(typing):
     else: return ", ".join(typing)+" are typing"
 
 def drawScreen(typing, inp):
-    os.system("clear")
     messages.append(formatTyping(typing))
     messages.append("")
     messages.append(inp)
     viewGrid = formatGrid(grid)
+    toPrint = []
     for i in range(len(grid)): 
-        try: print("".join(viewGrid[i])+" "+messages[i])
-        except: print("".join(viewGrid[i]))
+        try: toPrint.append("".join(viewGrid[i])+" "+messages[i])
+        except: toPrint.append("".join(viewGrid[i]))
     del messages[-1]
     del messages[-1]
     del messages[-1]
+    os.system("clear")
+    print("\n".join(toPrint))
 
 def refresh():
     drawScreen(typing, inp)
@@ -72,8 +76,8 @@ def recvMessage(message, sid):
     elif message[0] == "join":
         messages.append(message[1])
         pyno.notify(message[1],message[1],"default")
-    elif message[0] == "location": grid[message[1][0][1]][message[1][0][0]] = ansi.bg+message[1][1][1]+" "+ansi.esc
-    elif message[0] == "not location": grid[message[1][1]][message[1][0]] = "0"
+    elif message[0] == "location" and gridx == message[1][0][1][0] and gridy == message[1][0][1][1]: grid[message[1][0][0][1]][message[1][0][0][0]] = ansi.bg+"250m"+ansi.color+message[1][1][1]+"●"+ansi.esc
+    elif message[0] == "not location" and gridx == message[1][1][0] and gridy == message[1][1][1]: grid[message[1][0][1]][message[1][0][0]] = "0"
     drawScreen(typing, inp)
 
 def passTypers():
@@ -93,6 +97,6 @@ def passColor(var):
     global color
     color = var
 
-def passGrid(var):
-    global grid
-    grid = var
+def passGrid(a, b, c):
+    global grid, gridx, gridy
+    grid, gridx, gridy = a, b, c
