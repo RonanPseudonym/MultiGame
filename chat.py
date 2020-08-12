@@ -88,10 +88,10 @@ try:
                     y += 1
                     wsm.push(["location",[[[x,y],[gridx,gridy]],[hostname, color]]])
             elif key == "left":
-                if x >= width-2: 
+                if x <= 1: 
                     wsm.push(["not location",[[x,y],[gridx,gridy]]])
-                    gridx += 1
-                    x = 0
+                    gridx -= 1
+                    x = width-1
                     grid = tile(gridx, gridy)
                     wsm.push(["location",[[[x,y],[gridx,gridy]],[hostname, color]]])
                     break
@@ -99,11 +99,13 @@ try:
                     wsm.push(["not location",[[x,y],[gridx,gridy]]])
                     x -= 1
                     wsm.push(["location",[[[x,y],[gridx,gridy]],[hostname, color]]])
-            elif key == "right": 
-                if x <= 1: 
-                    gridx -= 1
-                    x = width-1
+            elif key == "right":
+                if x >= width-2: 
+                    wsm.push(["not location",[[x,y],[gridx,gridy]]])
+                    gridx += 1
+                    x = 0
                     grid = tile(gridx, gridy)
+                    wsm.push(["location",[[[x,y],[gridx,gridy]],[hostname, color]]])
                     break
                 elif grid[y][x+1] == "0":
                     wsm.push(["not location",[[x,y],[gridx,gridy]]])
