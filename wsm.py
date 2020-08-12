@@ -11,12 +11,15 @@ inp = ""
 name = ""
 color = ""
 
-global gridx, gridy
+global gridx, gridy, x, y
 
-width, height = 40, 20
+x = 0
+y = 0
+
+width, height, x, y = 40, 20, 0, 0
 
 substitutions = {
-    "2": ansi.bg+"240m "+ansi.esc,
+    "2": ansi.color+"241m"+ansi.bg+"240m "+ansi.esc,
     "1": ansi.bg+"244m "+ansi.esc,
     "0": ansi.bg+"250m "+ansi.esc,
     "w": ansi.bg+"27m"+ansi.color+"69m "+ansi.esc
@@ -76,8 +79,12 @@ def recvMessage(message, sid):
     elif message[0] == "join":
         messages.append(message[1])
         pyno.notify(message[1],message[1],"default")
-    elif message[0] == "location" and gridx == message[1][0][1][0] and gridy == message[1][0][1][1]: grid[message[1][0][0][1]][message[1][0][0][0]] = ansi.bg+"250m"+ansi.color+message[1][1][1]+"●"+ansi.esc
+    elif message[0] == "location" and gridx == message[1][0][1][0] and gridy == message[1][0][1][1]: 
+        grid[message[1][0][0][1]][message[1][0][0][0]] = ansi.bg+"250m"+ansi.color+message[1][1][1]+"●"+ansi.esc
+        global x, y
+        x, y = message[1][0][0][0],message[1][0][0][1]
     elif message[0] == "not location" and gridx == message[1][1][0] and gridy == message[1][1][1]: grid[message[1][0][1]][message[1][0][0]] = "0"
+    elif message[0] == "location request" and gridx == message[1][0] and gridy == message[1][1] and name != message[1][2]: push(["location",[[[x,y],[gridx,gridy]],[name, color]]])
     drawScreen(typing, inp)
 
 def passTypers():
@@ -97,6 +104,6 @@ def passColor(var):
     global color
     color = var
 
-def passGrid(a, b, c):
-    global grid, gridx, gridy
-    grid, gridx, gridy = a, b, c
+def passGrid(a, b, c, d, e):
+    global grid, gridx, gridy, x, y
+    grid, gridx, gridy, x, y = a, b, c, d, e

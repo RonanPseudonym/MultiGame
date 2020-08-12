@@ -34,7 +34,10 @@ grid = []
 
 directory = os.path.dirname(os.path.realpath(__file__))
 
-def tile(x, y):
+def tile():
+
+    wsm.push(["location request",[gridx, gridy, hostname]])
+
     grid = []
 
     f = open(directory+"/"+str(gridx)+"_"+str(gridy)+".txt")
@@ -42,12 +45,12 @@ def tile(x, y):
     for line in f: 
         grid.append(list(line.replace("\n","")))
 
-    wsm.passGrid(grid, x, y)
+    wsm.passGrid(grid, gridx, gridy, x, y)
 
     return grid
 
 try: 
-    grid = tile(gridx, gridy)
+    grid = tile()
     wsm.push(["location",[[[x,y],[gridx,gridy]],[hostname, color]]])
     while True:
         inp = ["> "]
@@ -68,7 +71,7 @@ try:
                     wsm.push(["not location",[[x,y],[gridx,gridy]]])
                     gridy += 1
                     y = height-1
-                    grid = tile(gridx, gridy)
+                    grid = tile()
                     wsm.push(["location",[[[x,y],[gridx,gridy]],[hostname, color]]])
                     break
                 elif grid[y-1][x] == "0":
@@ -80,7 +83,7 @@ try:
                     wsm.push(["not location",[[x,y],[gridx,gridy]]])
                     gridy -= 1
                     y = 0
-                    grid = tile(gridx, gridy)
+                    grid = tile()
                     wsm.push(["location",[[[x,y],[gridx,gridy]],[hostname, color]]])
                     break 
                 elif grid[y+1][x] == "0":
@@ -92,7 +95,7 @@ try:
                     wsm.push(["not location",[[x,y],[gridx,gridy]]])
                     gridx -= 1
                     x = width-1
-                    grid = tile(gridx, gridy)
+                    grid = tile()
                     wsm.push(["location",[[[x,y],[gridx,gridy]],[hostname, color]]])
                     break
                 elif grid[y][x-1] == "0":
@@ -104,7 +107,7 @@ try:
                     wsm.push(["not location",[[x,y],[gridx,gridy]]])
                     gridx += 1
                     x = 0
-                    grid = tile(gridx, gridy)
+                    grid = tile()
                     wsm.push(["location",[[[x,y],[gridx,gridy]],[hostname, color]]])
                     break
                 elif grid[y][x+1] == "0":
